@@ -1,0 +1,184 @@
+public class OrderedList<G extends Comparable<G>> {
+    //Attributes of the class OrderedList
+    private Node<G> front;
+    private Node<G> rear;
+    private int size;
+
+    /**
+     * Constructor for OrderedList.
+     */
+    public OrderedList() {
+        front = null;
+        rear = null;
+        size = 0;
+    }
+
+    /**
+     * A remove method that removes the first occurrence of a given object G.
+     * This Object is considered generic allowing different forms of types to be removed.
+     *
+     * @param object represents the object to be removed.
+     * @return Null if there is nothing in the list, set the front to its own link, or set the previous node that
+     * does not equal the link, then finally decrease the size.
+     */
+    public G remove(G object) {
+        if (front == null) return null;
+        Node previous = null, current = front;//two nodes used for comparing and removing.
+        for (; current != null && !current.getData().equals(object); current = current.getLink())
+            previous = current;
+        if (previous == null)//The first needs to be removed
+            front = front.getLink();
+        else if (current == null)//do nothing because object isn't in the list.
+            return null;
+        previous.setLink(current.getLink());//set the previous link to the currents link, skipping the current.
+        size--;//decrease the size
+        return null;
+    }
+
+    /**
+     * A simple get method used to find a desired positions data using a count.
+     *
+     * @param k represents the position in the OrderedList.
+     * @return the desired data at the position.
+     */
+    public G get(int k) {
+        int count = 0;
+        for (Node<G> i = front; i != null; i = i.getLink()) {
+            if (count == k - 1)//k-1 because the position would be exclusive for the final position
+                return i.getData();
+            count++;//increase the size
+        }
+        return null;
+    }
+
+    /**
+     * A Insert method that adds a single piece of data into an OrderedList going in ascending order or smallest
+     * to largest. If there is nothing in the list, simply add the desired element into the list and assign that to the
+     * front and rear. If there is already something in the list, compare the element to the data in the front.
+     * If the element is less than the front, the front gets a new node containing the data from the element
+     * and a link to the front, otherwise just set the link of the rear to the element
+     * and have the rear get its own link.
+     * If there is two or more nodes in the list, check if the element is less than the rear or greater
+     * than the element. if its less, then assign it to the front. If its more, assign to the rear.
+     * But if it is between the front and the rear, traverse through the list and compare.
+     *
+     * @param data represents the data being added.
+     */
+    public void insert(G data) {
+        Node<G> element = new Node<>(data, null);
+        if (front == null)//First clause, nothing in the list.
+        {
+            front = element;
+            rear = front;
+        }
+        if (size == 1)//second clause, one in the list.
+        {
+            if (element.getData().compareTo(front.getData()) < 0)//compare the element to the front.
+            {
+                front = new Node<>(data, front);//if less than, assign to front with link to previous front.
+            } else//otherwise, set the rear.
+            {
+                rear.setLink(element);
+                rear = rear.getLink();
+            }
+        }
+        if (size >= 2)//Third and Final clause, two or more in the list.
+        {
+            if (element.getData().compareTo(front.getData()) < 0)//compare to the front.
+            {
+                front = new Node<>(data, front);
+            } else if (element.getData().compareTo(rear.getData()) > 0)//compare to the rear
+            {
+                rear.setLink(element);
+                rear = rear.getLink();
+            }
+            //If the element is between front and rear.
+            else if (element.getData().compareTo(front.getData()) > 0 && element.getData().compareTo(rear.getData()) < 0) {
+                Node<G> previous = null, current = front;//previous represents the node before current
+                for (; current != null; current = current.getLink()) {
+                    for (; current.getData().compareTo(element.getData()) <= 0; current = current.getLink())
+                        previous = current;//assign the current node that is less than or = object
+                    if (current.getData().compareTo(element.getData()) > 0)//if the current is larger
+                    {
+                        element = new Node<>(data, current);//element gets current as link.
+                        previous.setLink(element);//previous gets element as link.
+                        break;
+                    }
+                }
+            }
+        }
+        size++;
+    }
+
+    /**
+     * A method that involves finding the k amount of largest numbers within a list
+     *
+     * @param k represents the amount of largest numbers to be returned
+     * @return the  k largest pieces of data.
+     */
+    public OrderedList kLargest(int k) {
+        OrderedList<G> largestValues = new OrderedList<>();//the final returned OrderedList to be added to
+        if (k >= size)//if k is greater than the list, insert all the data in to the new list.
+            for (Node<G> i = front; i != null; i = i.getLink()) {
+                largestValues.insert(i.getData());
+            }
+        if (k < size)//if k is less than the list
+        {
+            Node<G> i = front;
+            for (int j = 0; j < size - k; j++)//skip the amount of the size - k.
+            {
+                i = i.getLink();
+            }
+            for (; i != null; i = i.getLink())//insert the remaining numbers into the new list.
+            {
+                largestValues.insert(i.getData());
+            }
+        }
+        return largestValues;
+    }
+
+    /**
+     * toString method
+     *
+     * @return a concatenated string.
+     */
+    public String toString() {
+        String s = "[";
+        Node<G> i = front;
+        if (i != null) {
+            for (i = front; i != null; i = i.getLink())
+                s += i.getData() + ",";
+        }
+        s += "]";
+
+        return s;
+    }
+
+    /**
+     * A method that adds one list to another by inserting all of the data of each list into the new OrderedList
+     * It compares each position in each list and if the data in the first list is less than second list, then
+     * insert the data into the new OrderedList and remove that data, otherwise if the data in the second is less than
+     * the first, insert the second and remove from its list.
+     * <p>
+     * I could not get this to run the way you had asked, and i currently get a null point exception.
+     *
+     * @param two represents the second OrderedList.
+     * @return a new OrderedList result.
+     */
+    public OrderedList add(OrderedList two) {
+        OrderedList result = new OrderedList();
+        for (Node<G> i = front; i != null; ) {
+            for (Node<G> j = two.front; j != null; ) {
+                if (i.getData().compareTo(j.getData()) < 0) {
+                    //insert into OrderedList
+                    result.insert(i.getData());
+                    i = i.getLink();
+                } else if (j.getData().compareTo(i.getData()) < 0) {
+                    result.insert(j.getData());
+                    j = j.getLink();
+                }
+            }
+        }
+        return result;
+    }
+}
